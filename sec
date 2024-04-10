@@ -100,3 +100,191 @@ int main() {
 
     return 0;
 }
+#!/bin/bash
+
+file="cities.txt"
+
+# Function to add a new record
+add_record() {
+    echo "Enter city name:"
+    read city
+    echo "Enter 2020 population:"
+    read pop_2020
+    echo "Enter 2015 population:"
+    read pop_2015
+    echo "Enter 2010 population:"
+    read pop_2010
+    echo "$city, $pop_2020, $pop_2015, $pop_2010" >> "$file"
+    echo "Record added successfully"
+}
+
+# Function to delete a record
+delete_record() {
+    echo "Enter city name to delete:"
+    read city
+    sed -i "/^$city/d" "$file"
+    echo "Record deleted successfully"
+}
+
+# Function to modify a record
+modify_record() {
+    echo "Enter city name to modify:"
+    read city
+    echo "Enter new 2020 population:"
+    read pop_2020
+    echo "Enter new 2015 population:"
+    read pop_2015
+    echo "Enter new 2010 population:"
+    read pop_2010
+    sed -i "/^$city/c\\$city, $pop_2020, $pop_2015, $pop_2010" "$file"
+    echo "Record modified successfully"
+}
+
+# Function to sort records based on 2020 population
+sort_by_population() {
+    sort -t',' -k2 -nr "$file"
+}
+
+# Function to find cities with largest percentage decrease in population between 2005 and 2015
+largest_decrease() {
+    awk -F', ' '{ decrease = ($3 - $4) / $4 * 100; print $1, decrease }' "$file" | sort -k2 -nr | head -n 1
+}
+
+# Function to display number of Indians lived outside cities and towns in 2015
+outside_cities() {
+    awk -F', ' '{ total += ($3 - $2) } END { print total }' "$file"
+}
+
+# Function to display ten largest cities
+ten_largest_cities() {
+    sort -t',' -k2 -nr "$file" | head -n 10
+}
+
+# Function to display details of cities matching a pattern
+city_pattern() {
+    echo "Enter city name pattern:"
+    read pattern
+    grep "^$pattern" "$file"
+}
+
+# Main menu
+while true; do
+    echo "Menu:"
+    echo "1. Add a new record"
+    echo "2. Delete a record"
+    echo "3. Modify a record"
+    echo "4. Sort records by 2020 population"
+    echo "5. Find cities with largest percentage decrease in population between 2005 and 2015"
+    echo "6. Number of Indians lived outside cities and towns in 2015"
+    echo "7. Ten largest cities"
+    echo "8. Display details of cities matching a pattern"
+    echo "9. Exit"
+    read choice
+
+    case $choice in
+        1) add_record ;;
+        2) delete_record ;;
+        3) modify_record ;;
+        4) sort_by_population ;;
+        5) largest_decrease ;;
+        6) outside_cities ;;
+        7) ten_largest_cities ;;
+        8) city_pattern ;;
+        9) exit ;;
+        *) echo "Invalid choice";;
+    esac
+done
+#!/bin/bash
+
+file="cities.txt"
+
+# Function to add a new record
+add_record() {
+    echo "Enter city name:"
+    read city
+    echo "Enter 2020 population:"
+    read pop_2020
+    echo "Enter 2015 population:"
+    read pop_2015
+    echo "Enter 2010 population:"
+    read pop_2010
+    echo "$city, $pop_2020, $pop_2015, $pop_2010" >> "$file"
+    echo "Record added successfully"
+}
+
+# Function to delete a record
+delete_record() {
+    echo "Enter city name to delete:"
+    read city
+    sed -i "/^$city/d" "$file"
+    echo "Record deleted successfully"
+}
+
+# Function to modify a record
+modify_record() {
+    echo "Enter city name to modify:"
+    read city
+    echo "Enter new 2020 population:"
+    read pop_2020
+    echo "Enter new 2015 population:"
+    read pop_2015
+    echo "Enter new 2010 population:"
+    read pop_2010
+    sed -i "/^$city/c\\$city, $pop_2020, $pop_2015, $pop_2010" "$file"
+    echo "Record modified successfully"
+}
+
+# Function to sort records based on 2020 population
+sort_by_population() {
+    sort -t',' -k2 -nr "$file"
+}
+
+# Function to find cities with largest percentage decrease in population between 2005 and 2015
+largest_decrease() {
+    awk -F', ' '{ decrease = ($3 - $4) / $4 * 100; print $1, decrease }' "$file" | sort -k2 -nr | head -n 1
+}
+
+# Function to display number of Indians lived outside cities and towns in 2015
+outside_cities() {
+    awk -F', ' '{ total += ($3 - $2) } END { print total }' "$file"
+}
+
+# Function to display ten largest cities
+ten_largest_cities() {
+    sort -t',' -k2 -nr "$file" | head -n 10
+}
+
+# Function to display details of cities matching a pattern
+city_pattern() {
+    echo "Enter city name pattern:"
+    read pattern
+    grep "^$pattern" "$file"
+}
+
+# Main menu
+while true; do
+    echo "Menu:"
+    echo "1. Add a new record"
+    echo "2. Delete a record"
+    echo "3. Modify a record"
+    echo "4. Sort records by 2020 population"
+    echo "5. Find cities with largest percentage decrease in population between 2005 and 2015"
+    echo "6. Number of Indians lived outside cities and towns in 2015"
+    echo "7. Ten largest cities"
+    echo "8. Display details of cities matching a pattern"
+    echo "9. Exit"
+    read choice
+
+    case $choice in
+        1) add_record ;;
+        2) delete_record ;;
+        3) modify_record ;;
+        4) sort_by_population ;;
+        5) largest_decrease ;;
+        6) outside_cities ;;
+        7) ten_largest_cities ;;
+        8) city_pattern ;;
+        9) exit ;;
+        *) echo "Invalid choice";;
+    esac
+done
