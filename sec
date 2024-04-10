@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SHM_SIZE 1024
+
+int main() {
+    int fd[2]; // File descriptors for pipe
+    pid_t pid;
+    char input[SHM_SIZE];
+
+    // Create pipe
+    if (pipe(fd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fork process
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0) { // Parent process
+        close(fd[0]); // Close read end of pipe
+
+        // Get user input
+        printf("Enter a string: ");
+        fgets(input, sizeof(input), stdin);
+
+        // Write input to pipe
+        write(fd[1], input, strlen(input) + 1);
+        close(fd[1]); // Close write end of pipe
+
+        wait(NULL); // Wait for child process to finish
+
+        // Open shared memory
+        int shm_fd = shm_open("/shared_memory", O_RDONLY, 0666);
+        if (shm_fd == -1) {
+            perror("shm_open");
+            exit(EXIT_FAILURE);
+        }
+
+        // Map shared memory
+        char *data = mmap(NULL, SHM_SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+        if (data == MAP_FAILED) {
+            perror("mmap");
+            exit(EXIT_FAILURE);
+        }
+
+        // Print data from shared memory
+        printf("Received data: %s\n", data);
+
+        // Clean up
+        munmap(data, SHM_SIZE);
+        close(shm_fd);
+        shm_unlink("/shared_memory");
+    } else { // Child process
+        close(fd[1]); // Close write end of pipe
+
+        // Read from pipe
+        char received_data[SHM_SIZE];
+        read(fd[0], received_data, sizeof(received_data));
+        close(fd[0]); // Close read end of pipe
+
+        // Convert received data to lowercase
+        for (int i = 0; received_data[i]; i++) {
+            received_data[i] = tolower(received_data[i]);
+        }
+
+        // Create and map shared memory
+        int shm_fd = shm_open("/shared_memory", O_CREAT | O_RDWR, 0666);
+        if (shm_fd == -1) {
+            perror("shm_open");
+            exit(EXIT_FAILURE);
+        }
+        ftruncate(shm_fd, SHM_SIZE);
+        char *data = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+        if (data == MAP_FAILED) {
+            perror("mmap");
+            exit(EXIT_FAILURE);
+        }
+
+        // Write lowercase data to shared memory
+        strcpy(data, received_data);
+
+        // Clean up
+        munmap(data, SHM_SIZE);
+        close(shm_fd);
+        exit(EXIT_SUCCESS);
+    }
+
+    return 0;
+}
